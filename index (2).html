@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduMind · 智能教学助手平台</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --surface: #1e2330;
+    --surface2: #242838;
+    --border: rgba(255,255,255,0.07);
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --accent3: #00d4a0;
+    --warn: #f7914f;
+    --text: #e8eaf0;
+    --text2: #8b92a8;
+    --text3: #545c72;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+  }
+
+  .logo {
+    padding: 0 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 16px;
+  }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    background: linear-gradient(135deg, #fff 40%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .nav-section { padding: 0 12px; margin-bottom: 8px; }
+  .nav-label { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding: 0 8px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--text2); font-size: 13.5px;
+    transition: all .18s;
+    position: relative;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: rgba(79,142,247,.12); color: var(--accent); }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 60%; background: var(--accent); border-radius: 0 2px 2px 0;
+  }
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 20px;
+  }
+
+  .sidebar-bottom {
+    margin-top: auto; padding: 16px 12px 0;
+    border-top: 1px solid var(--border);
+  }
+  .user-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; border-radius: var(--radius-sm); cursor: pointer;
+    transition: background .18s;
+  }
+  .user-card:hover { background: var(--surface); }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent3));
+    display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  .main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg);
+  }
+
+  .topbar {
+    height: 56px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 600; flex: 1;
+    color: var(--text2);
+  }
+  .topbar-title span { color: var(--text); }
+  .topbar-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); font-size: 12px; cursor: pointer;
+    transition: all .18s; font-family: inherit; white-space: nowrap;
+  }
+  .topbar-btn:hover { border-color: rgba(79,142,247,.4); color: var(--accent); background: rgba(79,142,247,.06); }
+  .topbar-btn.primary { background: var(--accent); color: #fff; border-color: transparent; }
+  .topbar-btn.primary:hover { background: #6aa2ff; }
+
+  .chat-area {
+    flex: 1; overflow-y: auto; padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .welcome {
+    text-align: center; padding: 36px 0 16px;
+    animation: fadeUp .5s ease;
+  }
+  .welcome-icon {
+    width: 64px; height: 64px; margin: 0 auto 16px;
+    background: linear-gradient(135deg, rgba(79,142,247,.2), rgba(124,92,252,.2));
+    border: 1px solid rgba(79,142,247,.3);
+    border-radius: 20px; display: grid; place-items: center; font-size: 28px;
+  }
+  .welcome h2 {
+    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .welcome p { color: var(--text2); font-size: 13.5px; line-height: 1.7; }
+
+  .quick-actions {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    max-width: 700px; margin: 0 auto; width: 100%;
+    animation: fadeUp .5s .1s both ease;
+  }
+  .qa-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    cursor: pointer; transition: all .2s;
+  }
+  .qa-card:hover {
+    border-color: rgba(79,142,247,.35);
+    background: var(--surface2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+  .qa-card-icon { font-size: 20px; margin-bottom: 7px; }
+  .qa-card-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .qa-card-desc { font-size: 11.5px; color: var(--text3); line-height: 1.5; }
+
+  .msg { display: flex; gap: 10px; max-width: 800px; }
+  .msg.user { flex-direction: row-reverse; margin-left: auto; }
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 12px;
+  }
+  .msg.ai .msg-avatar { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+  .msg.user .msg-avatar { background: linear-gradient(135deg, var(--accent3), #3ab5d8); }
+  .msg-bubble {
+    padding: 11px 15px; border-radius: var(--radius);
+    font-size: 13.5px; line-height: 1.75; max-width: calc(100% - 42px);
+  }
+  .msg.ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); }
+  .msg.user .msg-bubble { background: rgba(79,142,247,.15); border: 1px solid rgba(79,142,247,.2); }
+  .msg-bubble strong { color: var(--accent); font-weight: 600; }
+  .msg-bubble .tag {
+    display: inline-block; background: rgba(79,142,247,.12);
+    border: 1px solid rgba(79,142,247,.25); color: var(--accent);
+    font-size: 11px; padding: 2px 7px; border-radius: 4px; margin: 2px;
+  }
+  .msg-bubble .skill-used {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(0,212,160,.08); border: 1px solid rgba(0,212,160,.2);
+    color: var(--accent3); font-size: 11px; padding: 3px 10px;
+    border-radius: 20px; margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    padding: 14px 20px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .shortcut-bar {
+    display: flex; gap: 6px; margin-bottom: 9px; flex-wrap: wrap;
+  }
+  .shortcut {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); font-size: 12px; cursor: pointer;
+    transition: all .18s; user-select: none;
+  }
+  .shortcut:hover { border-color: rgba(79,142,247,.4); color: var(--accent); }
+  .shortcut.active { background: rgba(79,142,247,.12); border-color: rgba(79,142,247,.4); color: var(--accent); }
+
+  .input-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); display: flex; flex-direction: column;
+    transition: border-color .2s;
+  }
+  .input-box:focus-within { border-color: rgba(79,142,247,.45); }
+  .input-textarea {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: inherit; font-size: 14px;
+    padding: 13px 15px 8px; resize: none; min-height: 58px; line-height: 1.6;
+  }
+  .input-textarea::placeholder { color: var(--text3); }
+  .input-footer {
+    display: flex; align-items: center; gap: 7px; padding: 7px 11px;
+  }
+  .input-opt {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 9px; border-radius: 20px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text3); font-size: 11.5px; cursor: pointer;
+    transition: all .18s; user-select: none;
+  }
+  .input-opt:hover { color: var(--text2); border-color: rgba(255,255,255,.15); }
+  .input-opt.on { color: var(--accent); border-color: rgba(79,142,247,.35); background: rgba(79,142,247,.06); }
+  .input-actions { margin-left: auto; display: flex; align-items: center; gap: 7px; }
+  .send-btn {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--accent); border: none; cursor: pointer;
+    display: grid; place-items: center; font-size: 16px;
+    transition: all .18s; color: #fff;
+  }
+  .send-btn:hover { background: #6aa2ff; transform: scale(1.05); }
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: 7px;
+    border: 1px solid var(--border); background: transparent;
+    cursor: pointer; display: grid; place-items: center;
+    color: var(--text3); font-size: 14px; transition: all .18s;
+  }
+  .icon-btn:hover { color: var(--text2); }
+
+  /* MODAL */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+    z-index: 100; place-items: center;
+  }
+  .overlay.show { display: grid; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 18px; width: 660px; max-width: 92vw;
+    max-height: 80vh; display: flex; flex-direction: column;
+    animation: modalIn .22s ease; overflow: hidden;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .modal-close {
+    width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--border);
+    background: transparent; color: var(--text2); cursor: pointer;
+    display: grid; place-items: center; font-size: 12px; transition: all .18s;
+  }
+  .modal-close:hover { background: var(--surface); color: var(--text); }
+  .modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+  .modal-body::-webkit-scrollbar { width: 4px; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .skill-tabs {
+    display: flex; gap: 3px; background: var(--surface);
+    border-radius: var(--radius-sm); padding: 3px; margin-bottom: 14px;
+  }
+  .skill-tab {
+    flex: 1; padding: 6px; border-radius: 6px; border: none;
+    background: transparent; color: var(--text2); font-size: 13px;
+    cursor: pointer; transition: all .18s; font-family: inherit;
+  }
+  .skill-tab.active { background: var(--bg2); color: var(--text); }
+  .skill-search {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 7px 11px; margin-bottom: 13px;
+  }
+  .skill-search input {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: inherit; font-size: 13px; flex: 1;
+  }
+  .skill-search input::placeholder { color: var(--text3); }
+  .skill-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px; }
+  .skill-list { display: flex; flex-direction: column; gap: 3px; margin-bottom: 14px; }
+  .skill-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: background .15s;
+  }
+  .skill-item:hover { background: var(--surface); }
+  .skill-item-icon { font-size: 17px; width: 20px; text-align: center; }
+  .skill-item-name { font-size: 13px; }
+  .skill-item-tag { margin-left: auto; font-size: 11px; color: var(--text3); }
+  .more-btn {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 9px; border-radius: var(--radius-sm);
+    border: 1px dashed var(--border); background: transparent;
+    color: var(--text3); font-size: 12px; cursor: pointer; width: 100%;
+    transition: all .18s; font-family: inherit;
+  }
+  .more-btn:hover { border-color: rgba(79,142,247,.3); color: var(--accent); }
+
+  .cmd-filters { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+  .cmd-filter {
+    padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--text2); font-size: 12px;
+    cursor: pointer; transition: all .18s; font-family: inherit;
+  }
+  .cmd-filter.active { background: var(--accent); color: #fff; border-color: transparent; }
+  .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 18px; }
+  .cmd-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 13px 15px;
+    cursor: pointer; transition: all .18s;
+  }
+  .cmd-card:hover { border-color: rgba(79,142,247,.35); background: var(--surface2); }
+  .cmd-card.featured { border-color: rgba(247,145,79,.3); background: rgba(247,145,79,.03); }
+  .cmd-card-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .cmd-card-desc { font-size: 11.5px; color: var(--text3); line-height: 1.5; }
+  .cmd-prompt-area {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 13px 15px; font-size: 13px;
+    color: var(--text2); line-height: 1.75; margin-bottom: 13px;
+  }
+  .cmd-prompt-area .fill {
+    display: inline-block; background: rgba(247,145,79,.12);
+    border: 1px solid rgba(247,145,79,.3); color: var(--warn);
+    padding: 1px 7px; border-radius: 4px; font-size: 12px;
+    cursor: pointer; transition: all .15s;
+  }
+  .cmd-prompt-area .fill:hover { background: rgba(247,145,79,.2); }
+  .cmd-footer { display: flex; align-items: center; gap: 9px; }
+
+  .quiz-controls { display: flex; gap: 10px; margin-bottom: 14px; }
+  .select-box {
+    flex: 1; display: flex; align-items: center; gap: 7px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 7px 11px; cursor: pointer;
+  }
+  .select-box select {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: inherit; font-size: 12.5px; flex: 1; cursor: pointer;
+  }
+  .select-box select option { background: var(--bg2); }
+  .select-label { font-size: 10px; color: var(--text3); white-space: nowrap; }
+  .quiz-input-area {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 13px 15px;
+    font-size: 13.5px; color: var(--text3); min-height: 85px;
+    margin-bottom: 13px; line-height: 1.7;
+  }
+  .resource-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  .rtag {
+    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2); font-size: 12px; cursor: pointer;
+    transition: all .15s;
+  }
+  .rtag:hover { border-color: rgba(79,142,247,.35); color: var(--accent); }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    width: 260px; flex-shrink: 0;
+    background: var(--bg2); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 18px;
+    overflow-y: auto;
+  }
+  .right-panel::-webkit-scrollbar { width: 4px; }
+  .right-panel::-webkit-scrollbar-thumb { background: var(--border); }
+  .panel-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 12px; letter-spacing: .04em; text-transform: uppercase; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 18px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .stat-num.blue { color: var(--accent); }
+  .stat-num.purple { color: var(--accent2); }
+  .stat-num.green { color: var(--accent3); }
+  .stat-num.orange { color: var(--warn); }
+  .stat-label { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .activity-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .activity-item { display: flex; gap: 8px; align-items: flex-start; }
+  .activity-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .activity-dot.blue { background: var(--accent); }
+  .activity-dot.green { background: var(--accent3); }
+  .activity-dot.orange { background: var(--warn); }
+  .activity-text { font-size: 11.5px; color: var(--text2); line-height: 1.5; }
+  .activity-time { font-size: 10.5px; color: var(--text3); }
+  .skill-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skill-chip {
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 9px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface);
+    font-size: 11px; color: var(--text2); cursor: pointer; transition: all .15s;
+  }
+  .skill-chip:hover { border-color: rgba(79,142,247,.35); color: var(--accent); }
+
+  /* ARCH PANEL */
+  #arch-panel { display: none; flex-direction: column; flex: 1; overflow: auto; }
+  #arch-panel.active { display: flex; }
+  #chat-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  #chat-panel.hidden { display: none; }
+  .arch-content { flex: 1; overflow: auto; padding: 28px 36px; }
+  .arch-content::-webkit-scrollbar { width: 4px; }
+  .arch-content::-webkit-scrollbar-thumb { background: var(--border); }
+  .arch-title {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 5px;
+    background: linear-gradient(135deg, #fff, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .arch-sub { color: var(--text2); font-size: 13px; margin-bottom: 28px; }
+  .layer { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+  .layer-header {
+    display: flex; align-items: center; gap: 9px;
+    padding: 11px 16px; border-bottom: 1px solid var(--border); background: var(--surface);
+  }
+  .layer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .layer-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; }
+  .layer-desc { font-size: 11.5px; color: var(--text3); margin-left: auto; }
+  .layer-body { padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 7px; }
+  .arch-node {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 13px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--bg2);
+    font-size: 12px; color: var(--text2);
+  }
+  .arch-node .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .arch-arrow { display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 16px; margin: -2px 0; }
+  .flow-section { margin-bottom: 28px; }
+  .flow-title { font-family: 'Syne', sans-serif; font-size: 13.5px; font-weight: 700; color: var(--text2); margin-bottom: 11px; }
+  .flow-steps { display: flex; gap: 0; align-items: center; flex-wrap: wrap; gap: 4px; }
+  .flow-step {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 14px; min-width: 96px; text-align: center;
+  }
+  .flow-step-icon { font-size: 18px; margin-bottom: 3px; }
+  .flow-step-name { font-size: 11.5px; font-weight: 500; }
+  .flow-step-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .flow-arrow { color: var(--text3); font-size: 13px; padding: 0 2px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+  .typing span {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text3); margin: 0 2px; animation: pulse 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">EduMind</span>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">工作台</div>
+    <div class="nav-item active" id="navChat" onclick="showPanel('chat',this)">
+      <span class="nav-icon">💬</span> AI 助教对话
+    </div>
+    <div class="nav-item" id="navArch" onclick="showPanel('arch',this)">
+      <span class="nav-icon">🏗️</span> 平台架构
+    </div>
+  </div>
+  <div class="nav-section" style="margin-top:6px">
+    <div class="nav-label">教学工具</div>
+    <div class="nav-item" onclick="openModal('quiz')"><span class="nav-icon">📝</span> AI 出题</div>
+    <div class="nav-item" onclick="openModal('resource')"><span class="nav-icon">📚</span> 资源推荐</div>
+    <div class="nav-item" onclick="openModal('cmd')"><span class="nav-icon">⚡</span> 指令中心 <span class="nav-badge">10</span></div>
+    <div class="nav-item" onclick="openModal('skill')"><span class="nav-icon">🔌</span> Skill 市场</div>
+  </div>
+  <div class="nav-section" style="margin-top:6px">
+    <div class="nav-label">数据</div>
+    <div class="nav-item"><span class="nav-icon">📊</span> 学情分析</div>
+    <div class="nav-item"><span class="nav-icon">📅</span> 课程管理</div>
+    <div class="nav-item"><span class="nav-icon">👥</span> 班级学生</div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar">👩‍🏫</div>
+      <div>
+        <div class="user-name">王雅琴 老师</div>
+        <div class="user-role">高中思政 · 专业版</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="topbarTitle"><span>AI 助教对话</span> · 智能教学工作台</div>
+    <button class="topbar-btn" onclick="openModal('cmd')">⚡ 指令中心</button>
+    <button class="topbar-btn" onclick="openModal('quiz')">📝 AI 出题</button>
+    <button class="topbar-btn" onclick="openModal('resource')">📚 资源推荐</button>
+    <button class="topbar-btn primary" onclick="newChat()">＋ 新建对话</button>
+  </header>
+
+  <div id="chat-panel">
+    <div class="chat-area" id="chatArea">
+      <div class="welcome" id="welcomeBlock">
+        <div class="welcome-icon">🤖</div>
+        <h2>你好，王老师！</h2>
+        <p>我是你的 AI 教学助手，可以帮你备课、出题、分析学情、推荐资源<br>也可以通过自然语言直接调用各类教学技能</p>
+      </div>
+      <div class="quick-actions" id="quickActions">
+        <div class="qa-card" onclick="sendQuick('帮我分析高三(2)班上周的学情数据，找出薄弱知识点')">
+          <div class="qa-card-icon">📊</div>
+          <div class="qa-card-title">学情数据分析</div>
+          <div class="qa-card-desc">分析班级近期作业和考试数据，识别薄弱点</div>
+        </div>
+        <div class="qa-card" onclick="sendQuick('生成5道关于社会主义核心价值观的单选题，难度中等')">
+          <div class="qa-card-icon">📝</div>
+          <div class="qa-card-title">智能出题</div>
+          <div class="qa-card-desc">根据知识点和难度自动生成练习题</div>
+        </div>
+        <div class="qa-card" onclick="sendQuick('推荐一些讲解国家治理体系的视频和文章资源')">
+          <div class="qa-card-icon">📚</div>
+          <div class="qa-card-title">教学资源推荐</div>
+          <div class="qa-card-desc">智能搜索匹配优质教学资源</div>
+        </div>
+        <div class="qa-card" onclick="sendQuick('帮我写一份社会主义核心价值观实践学习方案，3学分')">
+          <div class="qa-card-icon">📋</div>
+          <div class="qa-card-title">方案生成</div>
+          <div class="qa-card-desc">一键生成实践学习、调研等活动方案</div>
+        </div>
+        <div class="qa-card" onclick="sendQuick('帮我设计一节关于中国式现代化的探究式教学设计')">
+          <div class="qa-card-icon">🎯</div>
+          <div class="qa-card-title">教学设计</div>
+          <div class="qa-card-desc">生成完整的教案、学习目标与活动设计</div>
+        </div>
+        <div class="qa-card" onclick="openModal('skill')">
+          <div class="qa-card-icon">🔌</div>
+          <div class="qa-card-title">选择 Skill</div>
+          <div class="qa-card-desc">浏览全部可用技能，手动调用指定功能</div>
+        </div>
+      </div>
+    </div>
+    <div class="input-wrap">
+      <div class="shortcut-bar">
+        <div class="shortcut" onclick="openModal('skill')">@ 技能/文件</div>
+        <div class="shortcut" id="deepThinkBtn" onclick="toggleOpt(this)">🧠 深度思考</div>
+        <div class="shortcut" id="webSearchBtn" onclick="toggleOpt(this)">🌐 联网搜索</div>
+        <div class="shortcut" onclick="openModal('cmd')">⚡ 指令</div>
+      </div>
+      <div class="input-box">
+        <textarea class="input-textarea" id="msgInput" rows="2" placeholder="向 AI 助教提问，或描述你想完成的教学任务…" onkeydown="handleKey(event)"></textarea>
+        <div class="input-footer">
+          <button class="icon-btn" title="上传文件">📎</button>
+          <button class="icon-btn" title="语音输入">🎤</button>
+          <div class="input-actions">
+            <button class="send-btn" onclick="sendMessage()">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="arch-panel">
+    <div class="arch-content">
+      <div class="arch-title">EduMind 平台架构</div>
+      <div class="arch-sub">教育领域 AI 智能助教平台 · 技术与功能架构全览</div>
+
+      <div class="layer">
+        <div class="layer-header">
+          <div class="layer-dot" style="background:#4f8ef7"></div>
+          <div class="layer-name">前端交互层</div>
+          <div class="layer-desc">用户界面 & 体验</div>
+        </div>
+        <div class="layer-body">
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>AI 对话界面</div>
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>指令中心 Panel</div>
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>资源推荐面板</div>
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>AI 出题面板</div>
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>Skill 选择器</div>
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>学情数据看板</div>
+          <div class="arch-node"><div class="dot" style="background:#4f8ef7"></div>课程 / 班级管理</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕</div>
+      <div class="layer">
+        <div class="layer-header">
+          <div class="layer-dot" style="background:#7c5cfc"></div>
+          <div class="layer-name">智能编排层（Agent Orchestrator）</div>
+          <div class="layer-desc">意图识别 · Skill 路由 · 多轮对话管理</div>
+        </div>
+        <div class="layer-body">
+          <div class="arch-node"><div class="dot" style="background:#7c5cfc"></div>意图分类器（NLU）</div>
+          <div class="arch-node"><div class="dot" style="background:#7c5cfc"></div>Skill Router</div>
+          <div class="arch-node"><div class="dot" style="background:#7c5cfc"></div>参数提取器</div>
+          <div class="arch-node"><div class="dot" style="background:#7c5cfc"></div>多轮对话状态机</div>
+          <div class="arch-node"><div class="dot" style="background:#7c5cfc"></div>上下文记忆管理</div>
+          <div class="arch-node"><div class="dot" style="background:#7c5cfc"></div>指令模板渲染器</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕</div>
+      <div class="layer">
+        <div class="layer-header">
+          <div class="layer-dot" style="background:#00d4a0"></div>
+          <div class="layer-name">Skill 执行层</div>
+          <div class="layer-desc">可扩展功能模块，每个 Skill 独立部署</div>
+        </div>
+        <div class="layer-body">
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>📊 学情分析 Skill</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>📝 智能出题 Skill</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>📚 资源推荐 Skill</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>📋 方案生成 Skill</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>🎯 教学设计 Skill</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>📅 日程打卡 Skill</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>🎬 PPT/视频生成</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>📖 快速榨干一本书</div>
+          <div class="arch-node"><div class="dot" style="background:#00d4a0"></div>🏆 成果评估 Skill</div>
+          <div class="arch-node" style="border-color:rgba(247,145,79,.3)"><div class="dot" style="background:#f7914f"></div>+ 自定义 Skill</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕</div>
+      <div class="layer">
+        <div class="layer-header">
+          <div class="layer-dot" style="background:#f7914f"></div>
+          <div class="layer-name">AI 模型层</div>
+          <div class="layer-desc">大语言模型 + 多模态能力</div>
+        </div>
+        <div class="layer-body">
+          <div class="arch-node"><div class="dot" style="background:#f7914f"></div>主对话 LLM</div>
+          <div class="arch-node"><div class="dot" style="background:#f7914f"></div>深度思考模型</div>
+          <div class="arch-node"><div class="dot" style="background:#f7914f"></div>Embedding 模型</div>
+          <div class="arch-node"><div class="dot" style="background:#f7914f"></div>图像/多模态模型</div>
+          <div class="arch-node"><div class="dot" style="background:#f7914f"></div>语音识别（ASR）</div>
+          <div class="arch-node"><div class="dot" style="background:#f7914f"></div>RAG 检索增强</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↕</div>
+      <div class="layer">
+        <div class="layer-header">
+          <div class="layer-dot" style="background:#e55f5f"></div>
+          <div class="layer-name">数据与服务层</div>
+          <div class="layer-desc">知识库 · 业务数据 · 外部集成</div>
+        </div>
+        <div class="layer-body">
+          <div class="arch-node"><div class="dot" style="background:#e55f5f"></div>教学资源知识库</div>
+          <div class="arch-node"><div class="dot" style="background:#e55f5f"></div>学情/成绩数据库</div>
+          <div class="arch-node"><div class="dot" style="background:#e55f5f"></div>课程/教材数据库</div>
+          <div class="arch-node"><div class="dot" style="background:#e55f5f"></div>用户行为日志</div>
+          <div class="arch-node"><div class="dot" style="background:#e55f5f"></div>联网搜索 API</div>
+          <div class="arch-node"><div class="dot" style="background:#e55f5f"></div>第三方平台集成</div>
+        </div>
+      </div>
+
+      <div style="height:28px"></div>
+
+      <div class="flow-section">
+        <div class="flow-title">🔄 核心交互流程：自然语言 → Skill 自动调用</div>
+        <div class="flow-steps">
+          <div class="flow-step"><div class="flow-step-icon">💬</div><div class="flow-step-name">用户输入</div><div class="flow-step-sub">自然语言指令</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-icon">🧠</div><div class="flow-step-name">意图识别</div><div class="flow-step-sub">NLU 分类</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-icon">🔌</div><div class="flow-step-name">Skill 路由</div><div class="flow-step-sub">自动/手动选择</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-icon">⚙️</div><div class="flow-step-name">Skill 执行</div><div class="flow-step-sub">调用模型/数据</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-icon">✨</div><div class="flow-step-name">结果生成</div><div class="flow-step-sub">格式化输出</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-icon">📤</div><div class="flow-step-name">展示给用户</div><div class="flow-step-sub">支持继续对话</div></div>
+        </div>
+      </div>
+
+      <div class="flow-section">
+        <div class="flow-title">📌 意图识别失败时的降级策略</div>
+        <div class="flow-steps">
+          <div class="flow-step" style="border-color:rgba(247,145,79,.3)"><div class="flow-step-icon">❓</div><div class="flow-step-name">意图不明确</div><div class="flow-step-sub">置信度低</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-color:rgba(247,145,79,.3)"><div class="flow-step-icon">🤔</div><div class="flow-step-name">AI 澄清提问</div><div class="flow-step-sub">追问关键信息</div></div>
+          <div class="flow-arrow">或</div>
+          <div class="flow-step" style="border-color:rgba(247,145,79,.3)"><div class="flow-step-icon">🔌</div><div class="flow-step-name">弹出 Skill 选择器</div><div class="flow-step-sub">用户手动选择</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-color:rgba(247,145,79,.3)"><div class="flow-step-icon">✅</div><div class="flow-step-name">继续执行</div><div class="flow-step-sub">正常流程</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<aside class="right-panel">
+  <div class="panel-title">课堂概览</div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-num blue">42</div><div class="stat-label">本班学生</div></div>
+    <div class="stat-card"><div class="stat-num green">87%</div><div class="stat-label">本周出勤</div></div>
+    <div class="stat-card"><div class="stat-num orange">12</div><div class="stat-label">待批作业</div></div>
+    <div class="stat-card"><div class="stat-num purple">3</div><div class="stat-label">今日课节</div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="panel-title">近期动态</div>
+  <div class="activity-list">
+    <div class="activity-item">
+      <div class="activity-dot blue"></div>
+      <div><div class="activity-text">AI 生成了第8单元测验题（20题）</div><div class="activity-time">10分钟前</div></div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot green"></div>
+      <div><div class="activity-text">学情分析报告：班级均分 83.4 分</div><div class="activity-time">2小时前</div></div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot orange"></div>
+      <div><div class="activity-text">资源推荐：新增3篇法治主题文章</div><div class="activity-time">昨天</div></div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot blue"></div>
+      <div><div class="activity-text">社会调研方案已生成并导出</div><div class="activity-time">2天前</div></div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="panel-title">常用 Skill</div>
+  <div class="skill-chips">
+    <div class="skill-chip" onclick="sendQuick('帮我分析最新学情数据')">📊 学情分析</div>
+    <div class="skill-chip" onclick="openModal('quiz')">📝 出题</div>
+    <div class="skill-chip" onclick="sendQuick('生成本周教学PPT大纲')">🎬 PPT</div>
+    <div class="skill-chip" onclick="sendQuick('写一份教学反思报告')">✍️ 写作</div>
+    <div class="skill-chip" onclick="sendQuick('推荐一本思政教学参考书并帮我快速提炼核心内容')">📖 读书</div>
+    <div class="skill-chip" onclick="openModal('skill')">+ 更多</div>
+  </div>
+</aside>
+
+<!-- SKILL MODAL -->
+<div class="overlay" id="skillModal" onclick="closeOnOverlay(event,'skillModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔌 选择 Skill</div>
+      <button class="modal-close" onclick="closeModal('skillModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="skill-search">
+        <span style="color:var(--text3)">🔍</span>
+        <input placeholder="搜索技能/文件…" />
+      </div>
+      <div class="skill-tabs">
+        <button class="skill-tab active" onclick="setSkillTab(this)">全部</button>
+        <button class="skill-tab" onclick="setSkillTab(this)">文件</button>
+        <button class="skill-tab" onclick="setSkillTab(this)">技能</button>
+      </div>
+      <div class="skill-label">最近用过</div>
+      <div class="skill-list">
+        <div class="skill-item" onclick="useSkill('快速榨干一本书')"><span class="skill-item-icon">📗</span><span class="skill-item-name">快速榨干一本书</span><span class="skill-item-tag">阅读</span></div>
+        <div class="skill-item" onclick="useSkill('成果评估技能')"><span class="skill-item-icon">🏆</span><span class="skill-item-name">成果评估技能</span><span class="skill-item-tag">评估</span></div>
+        <div class="skill-item" onclick="useSkill('日程打卡技能')"><span class="skill-item-icon">📅</span><span class="skill-item-name">日程打卡技能</span><span class="skill-item-tag">管理</span></div>
+        <div class="skill-item" onclick="useSkill('写作助手')"><span class="skill-item-icon">✍️</span><span class="skill-item-name">写作助手</span><span class="skill-item-tag">写作</span></div>
+        <div class="skill-item" onclick="useSkill('PPT 生成')"><span class="skill-item-icon">🎬</span><span class="skill-item-name">PPT 生成</span><span class="skill-item-tag">演示</span></div>
+        <div class="skill-item" onclick="useSkill('视频脚本生成')"><span class="skill-item-icon">🎥</span><span class="skill-item-name">视频脚本生成</span><span class="skill-item-tag">视频</span></div>
+        <div class="skill-item" onclick="useSkill('学情数据分析')"><span class="skill-item-icon">📊</span><span class="skill-item-name">学情数据分析</span><span class="skill-item-tag">数据</span></div>
+      </div>
+      <button class="more-btn">🌐 发现更多技能</button>
+    </div>
+  </div>
+</div>
+
+<!-- CMD MODAL -->
+<div class="overlay" id="cmdModal" onclick="closeOnOverlay(event,'cmdModal')">
+  <div class="modal" style="width:740px">
+    <div class="modal-header">
+      <div class="modal-title">⚡ 指令中心</div>
+      <button class="modal-close" onclick="closeModal('cmdModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cmd-filters">
+        <button class="cmd-filter active" onclick="filterCmd(this)">全部</button>
+        <button class="cmd-filter" onclick="filterCmd(this)">实践教学-教</button>
+        <button class="cmd-filter" onclick="filterCmd(this)">实践教学-学</button>
+      </div>
+      <div class="cmd-grid">
+        <div class="cmd-card featured" onclick="selectCmd('实践学习方案生成','[实践学习项目名称]','[数量]')"><div class="cmd-card-title">实践学习方案生成</div><div class="cmd-card-desc">根据项目名称和学分数，生成完整的实践学习方案，含人员安排、调研方案等</div></div>
+        <div class="cmd-card featured" onclick="selectCmd('社会调研报告','[主题]','[班级]')"><div class="cmd-card-title">社会调研报告</div><div class="cmd-card-desc">根据要求，生成思政课社会调研报告</div></div>
+        <div class="cmd-card" onclick="selectCmd('基地参观报告','[参观基地名称]','[班级]')"><div class="cmd-card-title">基地参观报告</div><div class="cmd-card-desc">根据大思政课实践教学基地参观，设计实践总结报告</div></div>
+        <div class="cmd-card" onclick="selectCmd('经典研读报告','[书名]','[班级]')"><div class="cmd-card-title">经典研读报告</div><div class="cmd-card-desc">根据指定思政类书籍，设计经典研读活动报告</div></div>
+        <div class="cmd-card" onclick="selectCmd('思政课微电影脚本','[主题]','[时长]分钟')"><div class="cmd-card-title">思政课微电影脚本</div><div class="cmd-card-desc">根据思政课实践教学要求，设计微电影脚本</div></div>
+        <div class="cmd-card" onclick="selectCmd('经典研读书目','[学段]','[主题]')"><div class="cmd-card-title">经典研读书目</div><div class="cmd-card-desc">推荐思政课经典研读的书目名称</div></div>
+        <div class="cmd-card" onclick="selectCmd('大学生讲思政课教学设计','[主题]','[课时]')"><div class="cmd-card-title">大学生讲思政课教学设计</div><div class="cmd-card-desc">根据主题，设计大学生讲思政课的教学设计</div></div>
+        <div class="cmd-card" onclick="selectCmd('大学生讲思政课实施方案','[主题]','[学期]')"><div class="cmd-card-title">大学生讲思政课实施方案</div><div class="cmd-card-desc">根据不同主题，生成大学生讲思政课实施方案</div></div>
+      </div>
+      <div id="cmdPromptWrap" style="display:none">
+        <div class="cmd-prompt-area" id="cmdPrompt"></div>
+        <div class="cmd-footer">
+          <div class="input-opt on">🧠 深度思考</div>
+          <div class="input-opt">🌐 联网搜索</div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="topbar-btn" onclick="document.getElementById('cmdPromptWrap').style.display='none'">取消</button>
+            <button class="topbar-btn primary" onclick="runCmd()">▶ 运行指令</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div class="overlay" id="quizModal" onclick="closeOnOverlay(event,'quizModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📝 AI 出题</div>
+      <button class="modal-close" onclick="closeModal('quizModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="quiz-controls">
+        <div class="select-box" style="flex:1.6">
+          <div class="select-label">题型</div>
+          <select><option>单选题</option><option>多选题</option><option>判断题</option><option>简答题</option><option>材料分析题</option></select>
+        </div>
+        <div class="select-box">
+          <div class="select-label">题数</div>
+          <select><option>1</option><option>3</option><option>5</option><option selected>10</option><option>20</option></select>
+        </div>
+        <div class="select-box">
+          <div class="select-label">难度</div>
+          <select><option>简单</option><option selected>中等</option><option>困难</option></select>
+        </div>
+      </div>
+      <div class="quiz-input-area" contenteditable="true" style="outline:none" placeholder="">需要出哪方面的题目呢？说出关键词吧……</div>
+      <div class="resource-tags">
+        <div class="rtag">社会主义核心价值观</div>
+        <div class="rtag">中国式现代化</div>
+        <div class="rtag">法治建设</div>
+        <div class="rtag">国家治理</div>
+        <div class="rtag">人类命运共同体</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="input-opt on">🧠 深度思考</div>
+        <div class="input-opt">🌐 联网搜索</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="topbar-btn" onclick="closeModal('quizModal')">取消</button>
+          <button class="topbar-btn primary" onclick="runQuiz()">✨ 生成题目</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESOURCE MODAL -->
+<div class="overlay" id="resourceModal" onclick="closeOnOverlay(event,'resourceModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📚 资源推荐</div>
+      <button class="modal-close" onclick="closeModal('resourceModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="quiz-input-area" contenteditable="true" style="outline:none">需要推荐哪方面的资源呢？说出关键词吧……</div>
+      <div class="resource-tags">
+        <div class="rtag">🎬 视频课程</div>
+        <div class="rtag">📄 学术文章</div>
+        <div class="rtag">📗 参考书目</div>
+        <div class="rtag">🖼️ 课件模板</div>
+        <div class="rtag">🗂️ 案例素材</div>
+        <div class="rtag">🌐 网络资源</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+        <button class="topbar-btn" onclick="closeModal('resourceModal')">取消</button>
+        <button class="topbar-btn primary" onclick="runResource()">🔍 开始推荐</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPanel(p, el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    if (p === 'chat') {
+      document.getElementById('chat-panel').classList.remove('hidden');
+      document.getElementById('arch-panel').classList.remove('active');
+      document.getElementById('topbarTitle').innerHTML = '<span>AI 助教对话</span> · 智能教学工作台';
+    } else {
+      document.getElementById('chat-panel').classList.add('hidden');
+      document.getElementById('arch-panel').classList.add('active');
+      document.getElementById('topbarTitle').innerHTML = '<span>平台架构</span> · EduMind 技术全览';
+    }
+  }
+
+  function openModal(id) { document.getElementById(id + 'Modal').classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+  function closeOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+  function toggleOpt(el) { el.classList.toggle('active'); }
+
+  function setSkillTab(btn) {
+    document.querySelectorAll('.skill-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function filterCmd(btn) {
+    document.querySelectorAll('.cmd-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function newChat() {
+    document.getElementById('chatArea').innerHTML = `
+      <div class="welcome"><div class="welcome-icon">🤖</div><h2>新对话已开始</h2><p>请输入你的问题或任务，AI 助教随时待命</p></div>`;
+    document.getElementById('chat-panel').classList.remove('hidden');
+    document.getElementById('arch-panel').classList.remove('active');
+    document.getElementById('navChat').classList.add('active');
+    document.getElementById('navArch').classList.remove('active');
+  }
+
+  function appendMsg(role, html) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + role;
+    el.innerHTML = `<div class="msg-avatar">${role==='ai'?'🤖':'👩‍🏫'}</div><div class="msg-bubble">${html}</div>`;
+    document.getElementById('chatArea').appendChild(el);
+    el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  function appendTyping() {
+    const el = document.createElement('div');
+    el.className = 'msg ai'; el.id = 'typingEl';
+    el.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><span class="typing"><span></span><span></span><span></span></span></div>`;
+    document.getElementById('chatArea').appendChild(el);
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function hideWelcome() {
+    ['welcomeBlock','quickActions'].forEach(id => { const e = document.getElementById(id); if(e) e.style.display='none'; });
+  }
+
+  const responses = {
+    '学情': t => `<span class="skill-used">⚙️ 学情分析 Skill 已调用</span><br>根据高三(2)班近两周数据：<br><br>📊 <strong>班级均分</strong> 83.4 分，较上次提升 2.1 分<br>⚠️ <strong>薄弱知识点</strong>：<span class="tag">国家治理体系</span><span class="tag">共同富裕</span><span class="tag">对外开放</span><br>✅ <strong>掌握较好</strong>：<span class="tag">社会主义核心价值观</span><span class="tag">法治建设</span><br><br>建议针对"国家治理体系"增加专项练习，共 <strong>11 名学生</strong>在该模块得分低于 70 分。`,
+    '出题': () => `<span class="skill-used">⚙️ 智能出题 Skill 已调用</span><br>已生成 <strong>5道单选题</strong>，主题：社会主义核心价值观<br><br><strong>1.</strong> 社会主义核心价值观在个人层面的要求是（）<br>A. 富强、民主 &nbsp;B. 自由、平等 &nbsp;<strong>C. 爱国、敬业、诚信、友善 ✅</strong> &nbsp;D. 文明、和谐<br><br><strong>2.</strong> "法治"在社会主义核心价值观中属于哪个层面？<br>A. 国家 &nbsp;<strong>B. 社会 ✅</strong> &nbsp;C. 个人 &nbsp;D. 以上都是<br><br><em style="color:var(--text3)">已生成全部5题，可导出为试卷</em>`,
+    '资源': () => `<span class="skill-used">⚙️ 资源推荐 Skill 已调用</span><br>为你推荐<strong>国家治理体系</strong>优质资源：<br><br>🎬 《大国治理》系列纪录片（B站官方）<br>📄 《推进国家治理体系和治理能力现代化》—— 人民日报<br>📗 《国家治理现代化的中国路径》<br>🖼️ 国家治理专题 PPT（已匹配课标）`,
+    '方案': () => `<span class="skill-used">⚙️ 方案生成 Skill 已调用</span><br><strong>「社会主义核心价值观」实践学习方案</strong>（3学分 · 20人）<br><br>📋 <strong>一、人员安排</strong>：5人一组共4组，设组长、记录员、汇报员<br>🔍 <strong>二、调研方案</strong>：街头访谈 + 问卷调查（附问卷模板）<br>📊 <strong>三、数据分析</strong>：提供 Excel 数据统计模板<br>📢 <strong>四、成果展示</strong>：以PPT或微电影形式汇报`,
+    '教学设计': () => `<span class="skill-used">⚙️ 教学设计 Skill 已调用</span><br><strong>「中国式现代化」探究式教学设计</strong><br><br>🎯 <strong>学习目标</strong>：理解中国式现代化五大特征，培养制度自信<br>⏱️ <strong>课时</strong>：1课时（45分钟）<br>📌 <strong>教学环节</strong>：情境导入（5min）→ 小组探究（15min）→ 展示汇报（15min）→ 总结升华（10min）`,
+    'default': t => `理解你的需求："<strong>${t.slice(0,18)}…</strong>"<br><br>我可以结合当前课程内容和学生情况提供建议。如需精准功能，可点击 <strong>@ 技能</strong> 选择对应模块，或使用顶部的<strong>指令中心</strong>快速启动预设流程。`
+  };
+
+  function detectIntent(t) {
+    if (/学情|数据|分析|薄弱/.test(t)) return '学情';
+    if (/出题|题目|测验|单选|多选/.test(t)) return '出题';
+    if (/资源|推荐|视频|文章|书/.test(t)) return '资源';
+    if (/方案|实践|调研/.test(t)) return '方案';
+    if (/教学设计|教案|探究/.test(t)) return '教学设计';
+    return 'default';
+  }
+
+  function sendMessage() {
+    const inp = document.getElementById('msgInput');
+    const txt = inp.value.trim(); if (!txt) return;
+    hideWelcome();
+    document.getElementById('chat-panel').classList.remove('hidden');
+    document.getElementById('arch-panel').classList.remove('active');
+    appendMsg('user', txt);
+    inp.value = '';
+    appendTyping();
+    setTimeout(() => {
+      document.getElementById('typingEl')?.remove();
+      appendMsg('ai', responses[detectIntent(txt)](txt));
+    }, 1100 + Math.random() * 500);
+  }
+
+  function sendQuick(txt) {
+    document.getElementById('msgInput').value = txt;
+    sendMessage();
+  }
+
+  function useSkill(name) {
+    closeModal('skillModal');
+    document.getElementById('msgInput').value = `[${name}] `;
+    document.getElementById('msgInput').focus();
+  }
+
+  function selectCmd(name, ...fills) {
+    let prompt = `生成主题为 <span class="fill" onclick="editFill(this)">${fills[0]}</span> 的${name}`;
+    if (fills[1]) prompt += `，参数：<span class="fill" onclick="editFill(this)">${fills[1]}</span>`;
+    prompt += `。要求：1. 给出合理的人员安排。 2. 给出切实可行的调研方案。 3. 给出数据收集方法。 4. 给出简单易用的数据分析建议。 5. 给出调研报告格式。 6. 给出宣传推广方案。`;
+    document.getElementById('cmdPrompt').innerHTML = prompt;
+    document.getElementById('cmdPromptWrap').style.display = 'block';
+  }
+
+  function editFill(el) {
+    const v = prompt('请输入值：', el.textContent);
+    if (v) el.textContent = v;
+  }
+
+  function runCmd() {
+    closeModal('cmdModal');
+    const txt = document.getElementById('cmdPrompt').innerText;
+    sendQuick(txt.slice(0, 50) + '…');
+  }
+
+  function runQuiz() { closeModal('quizModal'); sendQuick('生成10道单选题，主题：社会主义核心价值观，难度：中等'); }
+  function runResource() { closeModal('resourceModal'); sendQuick('推荐关于国家治理体系的优质教学资源，包含视频、文章和参考书目'); }
+</script>
+</body>
+</html>
